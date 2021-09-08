@@ -326,8 +326,9 @@ p {
 }
 
 #logo {
-    height: 5rem;
+    height: 10rem;
     margin-bottom: 2rem;
+    background-color: #fff;
 }
 
 #slider-text, #chart-selector {
@@ -663,7 +664,6 @@ hr {
 /* Heatmap
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 #heatmap-container {
-    margin: 2.5rem 0 0 0;
     background-color: #252e3f;
 }
 

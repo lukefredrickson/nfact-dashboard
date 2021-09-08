@@ -27,7 +27,7 @@ with urlopen('https://eric.clst.org/assets/wiki/uploads/Stuff/gz_2010_us_040_00_
     states = json.load(response)
 
 df = pd.read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv",
-                   dtype={"fips": str})
+                 dtype={"fips": str})
 
 
 # Load data
@@ -35,18 +35,21 @@ df = pd.read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master
 APP_PATH = str(pathlib.Path(__file__).parent.resolve())
 
 
-YEARS = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015]
+YEARS = [2003, 2004, 2005, 2006, 2007, 2008,
+         2009, 2010, 2011, 2012, 2013, 2014, 2015]
 
 
 # Map figure
 
 map_fig = px.choropleth_mapbox(df, geojson=states, locations='state', featureidkey="properties.NAME", color='cases',
-                           color_continuous_scale=px.colors.sequential.Plasma,
-                           mapbox_style="carto-positron",
-                           zoom=3, center = {"lat": 37.0902, "lon": -95.7129},
-                           opacity=1,
-)
-map_fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+                               color_continuous_scale=px.colors.sequential.Plasma,
+                               mapbox_style="carto-positron",
+                               zoom=3, center={"lat": 37.0902, "lon": -95.7129},
+                               opacity=1,
+                               )
+map_fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+
+chart_fig = px.bar(df[df.state.eq('Alabama')], x="date", y="cases")
 
 
 # App layout
@@ -61,22 +64,18 @@ app.layout = html.Div(
                     html.Img(id="logo", src=app.get_asset_url("segs_logo.png")),
                     href="https://segs.w3.uvm.edu/",
                 ),
-                html.A(
-                    html.Button("Enterprise Demo", className="link-button"),
-                    href="https://plotly.com/get-demo/",
-                ),
-                html.A(
-                    html.Button("Source Code", className="link-button"),
-                    href="https://github.com/plotly/dash-sample-apps/tree/main/apps/dash-opioid-epidemic",
-                ),
-                html.H4(children="Rate of US Poison-Induced Deaths"),
+                html.H4(children="COVID-19 Cases by State"),
                 html.P(
                     id="description",
-                    children="† Deaths are classified using the International Classification of Diseases, \
-                    Tenth Revision (ICD–10). Drug-poisoning deaths are defined as having ICD–10 underlying \
-                    cause-of-death codes X40–X44 (unintentional), X60–X64 (suicide), X85 (homicide), or Y10–Y14 \
-                    (undetermined intent).",
+                    children=[
+                        "† Data for COVID-19 Deaths sourced from NYTimes: ",
+                        html.A(
+                            "https://github.com/nytimes/covid-19-data/",
+                            href="https://github.com/nytimes/covid-19-data/"
+                        )
+                    ]
                 ),
+
             ],
         ),
         html.Div(
@@ -85,28 +84,6 @@ app.layout = html.Div(
                 html.Div(
                     id="left-column",
                     children=[
-                        html.Div(
-                            id="slider-container",
-                            children=[
-                                html.P(
-                                    id="slider-text",
-                                    children="Drag the slider to change the year:",
-                                ),
-                                dcc.Slider(
-                                    id="years-slider",
-                                    min=min(YEARS),
-                                    max=max(YEARS),
-                                    value=min(YEARS),
-                                    marks={
-                                        str(year): {
-                                            "label": str(year),
-                                            "style": {"color": "#7fafdf"},
-                                        }
-                                        for year in YEARS
-                                    },
-                                ),
-                            ],
-                        ),
                         html.Div(
                             id="heatmap-container",
                             children=[
@@ -129,12 +106,208 @@ app.layout = html.Div(
                         dcc.Dropdown(
                             options=[
                                 {
-                                    "label": "Dropdown 1",
-                                    "value": "1",
+                                    "label": "Alabama",
+                                    "value": "Alabama",
                                 },
                                 {
-                                    "label": "Dropdown 2",
-                                    "value": "2",
+                                    "label": "Alaska",
+                                    "value": "Alaska",
+                                },
+                                {
+                                    "label": "Arizona",
+                                    "value": "Arizona",
+                                },
+                                {
+                                    "label": "Arkansas",
+                                    "value": "Arkansas",
+                                },
+                                {
+                                    "label": "California",
+                                    "value": "California",
+                                },
+                                {
+                                    "label": "Colorado",
+                                    "value": "Colorado",
+                                },
+                                {
+                                    "label": "Connecticut",
+                                    "value": "Connecticut",
+                                },
+                                {
+                                    "label": "Delaware",
+                                    "value": "Delaware",
+                                },
+                                {
+                                    "label": "Florida",
+                                    "value": "Florida",
+                                },
+                                {
+                                    "label": "Georgia",
+                                    "value": "Georgia",
+                                },
+                                {
+                                    "label": "Hawaii",
+                                    "value": "Hawaii",
+                                },
+                                {
+                                    "label": "Idaho",
+                                    "value": "Idaho",
+                                },
+                                {
+                                    "label": "Illinois",
+                                    "value": "Illinois",
+                                },
+                                {
+                                    "label": "Indiana",
+                                    "value": "Indiana",
+                                },
+                                {
+                                    "label": "Iowa",
+                                    "value": "Iowa",
+                                },
+                                {
+                                    "label": "Kansas",
+                                    "value": "Kansas",
+                                },
+                                {
+                                    "label": "Kentucky",
+                                    "value": "Kentucky",
+                                },
+                                {
+                                    "label": "Louisiana",
+                                    "value": "Louisiana",
+                                },
+                                {
+                                    "label": "Maine",
+                                    "value": "Maine",
+                                },
+                                {
+                                    "label": "Maryland",
+                                    "value": "Maryland",
+                                },
+                                {
+                                    "label": "Massachusetts",
+                                    "value": "Massachusetts",
+                                },
+                                {
+                                    "label": "Michigan",
+                                    "value": "Michigan",
+                                },
+                                {
+                                    "label": "Minnesota",
+                                    "value": "Minnesota",
+                                },
+                                {
+                                    "label": "Mississippi",
+                                    "value": "Mississippi",
+                                },
+                                {
+                                    "label": "Missouri",
+                                    "value": "Missouri",
+                                },
+                                {
+                                    "label": "Montana",
+                                    "value": "Montana",
+                                },
+                                {
+                                    "label": "Nebraska",
+                                    "value": "Nebraska",
+                                },
+                                {
+                                    "label": "Nevada",
+                                    "value": "Nevada",
+                                },
+                                {
+                                    "label": "New Hampshire",
+                                    "value": "New Hampshire",
+                                },
+                                {
+                                    "label": "New Jersey",
+                                    "value": "New Jersey",
+                                },
+                                {
+                                    "label": "New Mexico",
+                                    "value": "New Mexico",
+                                },
+                                {
+                                    "label": "New York",
+                                    "value": "New York",
+                                },
+                                {
+                                    "label": "North Carolina",
+                                    "value": "North Carolina",
+                                },
+                                {
+                                    "label": "North Dakota",
+                                    "value": "North Dakota",
+                                },
+                                {
+                                    "label": "Ohio",
+                                    "value": "Ohio",
+                                },
+                                {
+                                    "label": "Oklahoma",
+                                    "value": "Oklahoma",
+                                },
+                                {
+                                    "label": "Oregon",
+                                    "value": "Oregon",
+                                },
+                                {
+                                    "label": "Pennsylvania",
+                                    "value": "Pennsylvania",
+                                },
+                                {
+                                    "label": "Puerto Rico",
+                                    "value": "Puerto Rico",
+                                },
+                                {
+                                    "label": "Rhode Island",
+                                    "value": "Rhode Island",
+                                },
+                                {
+                                    "label": "South Carolina",
+                                    "value": "South Carolina",
+                                },
+                                {
+                                    "label": "South Dakota",
+                                    "value": "South Dakota",
+                                },
+                                {
+                                    "label": "Tennessee",
+                                    "value": "Tennessee",
+                                },
+                                {
+                                    "label": "Texas",
+                                    "value": "Texas",
+                                },
+                                {
+                                    "label": "Utah",
+                                    "value": "Utah",
+                                },
+                                {
+                                    "label": "Vermont",
+                                    "value": "Vermont",
+                                },
+                                {
+                                    "label": "Virginia",
+                                    "value": "Virginia",
+                                },
+                                {
+                                    "label": "Washington",
+                                    "value": "Washington",
+                                },
+                                {
+                                    "label": "West Virginia",
+                                    "value": "West Virginia",
+                                },
+                                {
+                                    "label": "Wisconsin",
+                                    "value": "Wisconsin",
+                                },
+                                {
+                                    "label": "Wyoming",
+                                    "value": "Wyoming",
                                 },
                             ],
                             value="1",
@@ -142,15 +315,7 @@ app.layout = html.Div(
                         ),
                         dcc.Graph(
                             id="selected-data",
-                            figure=dict(
-                                data=[dict(x=0, y=0)],
-                                layout=dict(
-                                    paper_bgcolor="#F4F4F8",
-                                    plot_bgcolor="#F4F4F8",
-                                    autofill=True,
-                                    margin=dict(t=75, r=50, b=100, l=50),
-                                ),
-                            ),
+                            figure=chart_fig
                         ),
                     ],
                 ),
@@ -158,8 +323,6 @@ app.layout = html.Div(
         ),
     ],
 )
-
-
 
 if __name__ == "__main__":
     app.run_server(debug=True)
