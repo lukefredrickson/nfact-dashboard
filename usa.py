@@ -310,7 +310,7 @@ app.layout = html.Div(
                                     "value": "Wyoming",
                                 },
                             ],
-                            value="1",
+                            value="Alabama",
                             id="chart-dropdown",
                         ),
                         dcc.Graph(
@@ -323,6 +323,25 @@ app.layout = html.Div(
         ),
     ],
 )
+
+@app.callback(
+    Output("selected-data", "figure"),
+    [
+        Input("chart-dropdown", "value"),
+    ],
+)
+def display_selected_data(chart_dropdown):
+    chart_fig = px.bar(
+        df[df.state.eq(chart_dropdown)],
+        x="date",
+        y="cases",
+        title="{} Cumulative COVID-19 Cases".format(chart_dropdown)
+    )
+    chart_fig.update_traces(
+        marker_color="#1f2630",
+    )
+    return chart_fig
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
