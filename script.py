@@ -1,3 +1,5 @@
+#Script to print dropdown menu of all states.
+
 states = [
 "Alabama",
 "Alaska",

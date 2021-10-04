@@ -20,7 +20,7 @@ app = dash.Dash(
         {"name": "viewport", "content": "width=device-width, initial-scale=1"}
     ]
 )
-app.title = "US Opioid Epidemic"
+app.title = "US Food Insecurity"
 server = app.server
 
 
