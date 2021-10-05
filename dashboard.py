@@ -23,24 +23,18 @@ app = dash.Dash(
 app.title = "US Food Insecurity"
 server = app.server
 
+# Load Data
 
-with urlopen('https://eric.clst.org/assets/wiki/uploads/Stuff/gz_2010_us_040_00_500k.json') as response:
-    states = json.load(response)
+with open('data/gz_2010_us_040_00_500k.json') as geojson:
+    states = json.load(geojson)
 
-df = pd.read_csv(
-    "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv")
-
-
-# Load data
-
-
-YEARS = [2003, 2004, 2005, 2006, 2007, 2008,
-         2009, 2010, 2011, 2012, 2013, 2014, 2015]
+with open('data/db.csv') as df_file:
+    df = pd.read_csv(df_file)
 
 
 # Figures
 
-map_fig = px.choropleth_mapbox(df, geojson=states, locations='state', featureidkey="properties.NAME", color='cases',
+map_fig = px.choropleth_mapbox(df, geojson=states, locations='state', featureidkey="properties.NAME", color='overall_before',
                                color_continuous_scale=px.colors.sequential.Plasma,
                                mapbox_style="carto-positron",
                                zoom=3, center={"lat": 37.0902, "lon": -95.7129},
@@ -48,7 +42,14 @@ map_fig = px.choropleth_mapbox(df, geojson=states, locations='state', featureidk
                                )
 map_fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
 
-chart_fig = px.bar(df[df.state.eq('Alabama')], x="date", y="cases")
+chart_fig = px.bar(
+    df[df.state.eq("Alabama")],
+    x="study_site",
+    y=["overall_before", "overall_after", "overall_diff"],
+    facet_col="variable",
+    color="study_site",
+    title="{} Food Insecurity".format("Alabama")
+)
 
 
 # App layout
@@ -185,9 +186,11 @@ def display_click_data(clickData):
     chart_dropdown = clickData["points"][0]["location"]
     chart_fig = px.bar(
         df[df.state.eq(chart_dropdown)],
-        x="date",
-        y="cases",
-        title="{} Cumulative COVID-19 Cases".format(chart_dropdown)
+        x="study_site",
+        y=["overall_before", "overall_after", "overall_diff"],
+        facet_col="variable",
+        color="study_site",
+        title="{} Food Insecurity".format(chart_dropdown)
     )
     return chart_fig
 
