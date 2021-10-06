@@ -69,6 +69,22 @@ date_slider = dcc.RangeSlider(
 )
 
 
+states = df['state'].unique().tolist()
+states.insert(0, states.pop(states.index('National')))
+states_dropdown_options = [{'label': state, 'value': state} for state in states]
+study_site_state_dropdown = dcc.Dropdown(
+    id='study-site-state-dropdown',
+    options=states_dropdown_options,
+    value='National'
+)
+
+study_site_dropdown = dcc.Dropdown(
+    id='study-site-dropdown',
+    options=[{'label': 'National', 'value': 'National'}],
+    value='National'
+)
+
+
 # App layout
 
 header = dbc.Row(
@@ -133,20 +149,34 @@ study_site_info = html.Div(
                 dbc.Col(
                     children=[
                         html.H2(
-                            id="study-site-state",
+                            id='study-site-state',
                             children=[
-                                "Hello World"
+                                'Study Site State'
+                            ]
+                        ),
+                        html.H4(
+                            id='study-site-name',
+                            children=[
+                                'Study Site Name'
                             ]
                         )
                     ]
                 ),
                 dbc.Col(
                     children=[
-                        dcc.Dropdown(
-                            id='study-site-dropdown',
-                            options=[],
-                            value=''
+                        html.H6(
+                            'Select State:'
                         ),
+                        study_site_state_dropdown,
+                    ],
+                    width=3
+                ),
+                dbc.Col(
+                    children=[
+                        html.H6(
+                            'Select Study Site:'
+                        ),
+                        study_site_dropdown,
                     ],
                     width=3
                 ),
@@ -174,37 +204,50 @@ app.layout = dbc.Container(
 )
 
 @app.callback(
+    Output('study-site-state-dropdown', 'value'),
+    Input('map-figure', 'clickData')
+)
+def handle_map_click(clickData):
+    try:
+        state_name = clickData['points'][0]['location']
+        return state_name
+    except TypeError as e:
+        print(e)
+        return 'National'
+
+@app.callback(
     Output('study-site-dropdown', 'options'),
     Output('study-site-dropdown', 'value'),
     Output('study-site-state', 'children'),
-    Input('map-figure', 'clickData')
+    Input('study-site-state-dropdown', 'value')
 )
-def display_click_data(clickData):
+def handle_state_updated(state_name):
     try:
-        state_name = clickData['points'][0]['location']
         study_sites = df[(df['state'] == state_name)]['study_site'].tolist()
         options = [{'label': site, 'value': site} for site in study_sites]
-        return (options, study_sites[0], state_name)
+        study_site = study_sites[0]
+        return (options, study_site, state_name)
     except TypeError as e:
         print(e)
-        return ([], '', '')
+        return ([{'label': 'National', 'value': 'National'}], 'National', 'National')
 
 @app.callback(
     Output('date-slider', 'value'),
+    Output('study-site-name', 'children'),
     Input('study-site-dropdown', 'value'),
 )
-def display_site_data(study_site):
+def display_site_data(study_site_name):
     try:
-        study_site = df[(df['study_site'] == study_site)].iloc[0]
+        study_site = df[(df['study_site'] == study_site_name)].iloc[0]
         study_site_start_date = study_site['start_date']
         study_site_end_date = study_site['end_date']
         start_month_value = ((study_site_start_date.to_period('M')-start_date.to_period('M')).n)
         end_month_value = ((study_site_end_date.to_period('M')-start_date.to_period('M')).n)
         date_values = [start_month_value, end_month_value]
-        return (date_values)
+        return (date_values, study_site_name)
     except IndexError as e:
         print(e)
-        return []
+        return ([], '')
 
 
 if __name__ == '__main__':
