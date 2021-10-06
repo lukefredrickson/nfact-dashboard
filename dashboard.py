@@ -141,9 +141,26 @@ styles = {
     }
 }
 
+study_site_table = dbc.Table(
+    html.Tbody([
+        html.Tr([html.Td('Target Population'), html.Td('', id='target-population')]),
+        html.Tr([html.Td('Representative of State Population'), html.Td('', id='rep-state')]),
+        html.Tr([html.Td('Survey Sample Type'), html.Td('', id='sample-type')]),
+        html.Tr([html.Td('Survey Weighting'), html.Td('', id='weighting')]),
+        html.Tr([html.Td('Sampling and Recruitment'), html.Td('', id='sample-recruitment')]),
+    ]),
+    bordered=False,
+    size='lg'
+)
+
 study_site_info = html.Div(
     id='study-site-info',
     children=[
+        dbc.Row(
+            dbc.Col(
+                html.Br()
+            )
+        ),
         dbc.Row(
             children=[
                 dbc.Col(
@@ -183,10 +200,40 @@ study_site_info = html.Div(
             ]
         ),
         dbc.Row(
+            dbc.Col(
+                html.Br()
+            )
+        ),
+        dbc.Row(
             children=[
                 dbc.Col(
-                    date_slider
+                    children=[
+                        html.H4(
+                            'Survey Timeline'
+                        ),
+                        date_slider
+                    ]
                 ),
+            ]
+        ),
+        dbc.Row(
+            dbc.Col(
+                children=[
+                    html.Br(),
+                    html.H4(
+                        'Study Site Information'
+                    )
+                ]
+            )
+        ),
+        dbc.Row(
+            children=[
+                dbc.Col(
+                    children=[
+                        study_site_table,
+                    ]
+                ),
+                dbc.Col(),
             ]
         )
     ]
@@ -232,11 +279,18 @@ def handle_state_updated(state_name):
         return ([{'label': 'National', 'value': 'National'}], 'National', 'National')
 
 @app.callback(
-    Output('date-slider', 'value'),
     Output('study-site-name', 'children'),
     Input('study-site-dropdown', 'value'),
 )
-def display_site_data(study_site_name):
+def display_site_name(study_site_name):
+    return study_site_name
+
+@app.callback(
+    
+    Output('date-slider', 'value'),
+    Input('study-site-dropdown', 'value'),
+)
+def display_site_date_range(study_site_name):
     try:
         study_site = df[(df['study_site'] == study_site_name)].iloc[0]
         study_site_start_date = study_site['start_date']
@@ -244,10 +298,32 @@ def display_site_data(study_site_name):
         start_month_value = ((study_site_start_date.to_period('M')-start_date.to_period('M')).n)
         end_month_value = ((study_site_end_date.to_period('M')-start_date.to_period('M')).n)
         date_values = [start_month_value, end_month_value]
-        return (date_values, study_site_name)
+        return (date_values)
     except IndexError as e:
         print(e)
-        return ([], '')
+        return ([])
+
+@app.callback(
+    Output('target-population', 'children'),
+    Output('rep-state', 'children'),
+    Output('sample-type', 'children'),
+    Output('weighting', 'children'),
+    Output('sample-recruitment', 'children'),
+    Input('study-site-dropdown', 'value'),
+)
+def display_site_info(study_site_name):
+    try:
+        study_site = df[(df['study_site'] == study_site_name)].iloc[0]
+        return(
+            study_site['target_population'],
+            study_site['rep_state'],
+            study_site['sample_type'],
+            study_site['weighting'],
+            study_site['sample_recruitment'],
+        )
+    except IndexError as e:
+        print(e)
+        return ('', '', '', '', '')
 
 
 if __name__ == '__main__':
