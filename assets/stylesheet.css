@@ -1,7 +1,31 @@
-#map-figure {
-    height: 90vh;
+#root {
+    max-width: 1600px;
 }
 
-#root {
-    max-width: 2000px;
+#map-figure {
+    height: 800px;
+}
+
+#study-site-info {
+    margin-top: 2rem;
+}
+
+#date-slider .rc-slider-disabled {
+    background-color: transparent;
+}
+
+#date-slider .rc-slider-disabled .rc-slider-mark-text, .rc-slider-disabled .rc-slider-dot {
+    cursor: default !important
+}
+
+#date-slider .rc-slider-disabled .rc-slider-track {
+    border-color: #ccc;
+    box-shadow: none;
+    background-color: #007bff;
+    cursor: default;
+}
+
+#date-slider .rc-slider-disabled .rc-slider-handle, .rc-slider-disabled .rc-slider-dot-active {
+    border-color: #007bff;
+    cursor: default;
 }
