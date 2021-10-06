@@ -274,7 +274,7 @@ def handle_state_updated(state_name):
         options = [{'label': site, 'value': site} for site in study_sites]
         study_site = study_sites[0]
         return (options, study_site, state_name)
-    except TypeError as e:
+    except (TypeError, IndexError) as e:
         print(e)
         return ([{'label': 'National', 'value': 'National'}], 'National', 'National')
 
