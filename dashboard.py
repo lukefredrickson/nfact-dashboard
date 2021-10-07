@@ -43,7 +43,7 @@ map_fig = px.choropleth_mapbox(df, geojson=states, locations='state', featureidk
 map_fig.update_layout(margin={'r': 0, 't': 0, 'l': 0, 'b': 0})
 
 chart_fig = px.bar(
-    df[df.state.eq('Alabama')],
+    df[df.state.eq('National')],
     x='study_site',
     y=['overall_before', 'overall_after', 'overall_diff'],
     facet_col='variable',
@@ -55,7 +55,7 @@ start_date = df['start_date'].min()
 end_date = df['end_date'].max()
 n_months = (end_date.to_period('M')-start_date.to_period('M')).n + 1
 month_keys = [i for i in range(0, n_months)]
-month_labels = pd.date_range(start_date, periods=n_months, freq='M').strftime('%B,\n%Y').tolist()
+month_labels = pd.date_range(start_date, periods=n_months, freq='M').strftime('%b, %Y').tolist()
 dates = dict(zip(month_keys, month_labels))
 
 date_slider = dcc.RangeSlider(
@@ -231,9 +231,14 @@ study_site_info = html.Div(
                 dbc.Col(
                     children=[
                         study_site_table,
+                        html.Div(
+                            id='df-table'
+                        )
                     ]
                 ),
-                dbc.Col(),
+                dbc.Col(
+                    dcc.Graph(id='pop-fig', figure=px.bar())
+                ),
             ]
         )
     ]
@@ -324,6 +329,34 @@ def display_site_info(study_site_name):
     except IndexError as e:
         print(e)
         return ('', '', '', '', '')
+
+@app.callback(
+    Output('df-table', 'children'),
+    Output('pop-fig', 'figure'),
+    Input('study-site-dropdown', 'value'),
+)
+def display_site_graphs(study_site_name):
+    study_site = df[(df['study_site'] == study_site_name)].iloc[0]
+    site_df = study_site.to_frame()
+    site_df.index.name = 'vars'
+    site_df.reset_index(inplace=True)
+    site_df.columns.values[1] = 'data'
+    table = dbc.Table.from_dataframe(
+        df = site_df,
+        striped=True,
+        bordered=True,
+        hover=True),
+
+    pop_chart_vars = ['total', 'hh_children', 'work_disruption', 'bipoc', 'nhw', 'nhb', 'hispanic', 'other']
+    pop_chart_df = site_df.loc[site_df['vars'].isin(pop_chart_vars)]
+    pop_chart_fig = px.bar(
+        pop_chart_df,
+        x='vars',
+        y='data',
+        title='Total number of respondents and sub-population characteristics'
+    )
+
+    return(table, pop_chart_fig)
 
 
 if __name__ == '__main__':
