@@ -35,22 +35,12 @@ with open('data/db.csv') as df_file:
 
 # Figures & Components
 
-map_fig = px.choropleth_mapbox(df, geojson=states, locations='state', featureidkey='properties.NAME', color='overall_after',
-                               color_continuous_scale=px.colors.sequential.Plasma,
+map_fig = px.choropleth_mapbox(df, geojson=states, locations='state', featureidkey='properties.NAME',
                                mapbox_style='carto-positron',
                                zoom=4, center={'lat': 38, 'lon': -95.7129},
                                opacity=1,
                                )
-map_fig.update_layout(margin={'r': 0, 't': 0, 'l': 0, 'b': 0})
-
-chart_fig = px.bar(
-    df[df.state.eq('National')],
-    x='study_site',
-    y=['overall_before', 'overall_after', 'overall_diff'],
-    facet_col='variable',
-    color='study_site',
-    title='{} Food Insecurity'.format('Alabama')
-)
+map_fig.update_layout(margin={'r': 0, 't': 0, 'l': 0, 'b': 0}, showlegend=False)
 
 start_date = df['start_date'].min()
 end_date = df['end_date'].max()
@@ -235,12 +225,7 @@ study_site_info = html.Div(
                     children=[
                         study_site_table,
                         dcc.Graph(id='population-fig', figure=px.bar()),
-                        dcc.Graph(id='food-insecurity-overall-fig', figure=px.bar()),
-                        dcc.Graph(id='food-insecurity-bipoc-fig', figure=px.bar()),
-                        dcc.Graph(id='food-insecurity-h-fig', figure=px.bar()),
-                        dcc.Graph(id='food-insecurity-nhw-fig', figure=px.bar()),
-                        dcc.Graph(id='food-insecurity-nhb-fig', figure=px.bar()),
-                        dcc.Graph(id='food-insecurity-hhc-fig', figure=px.bar()),
+                        dcc.Graph(id='food-insecurity-fig', figure=px.bar()),
                         dcc.Graph(id='job-disruption-fig', figure=px.bar()),
                     ]
                 )
@@ -337,12 +322,7 @@ def display_site_info(study_site_name):
 
 @app.callback(
     Output('population-fig', 'figure'),
-    Output('food-insecurity-overall-fig', 'figure'),
-    Output('food-insecurity-bipoc-fig', 'figure'),
-    Output('food-insecurity-nhw-fig', 'figure'),
-    Output('food-insecurity-nhb-fig', 'figure'),
-    Output('food-insecurity-h-fig', 'figure'),
-    Output('food-insecurity-hhc-fig', 'figure'),
+    Output('food-insecurity-fig', 'figure'),
     Output('job-disruption-fig', 'figure'),
     Input('study-site-dropdown', 'value'),
 )
@@ -368,121 +348,52 @@ def display_site_graphs(study_site_name):
             'vars': 'Sub-Populations',
         },
         title='Total number of respondents and sub-population characteristics',
-        template='plotly_white'
+        template='plotly_white',
+        color_discrete_sequence=px.colors.qualitative.Plotly,
     )
 
+    
     food_insec_overall_vars = ['overall_before', 'overall_after', 'overall_diff']
-    food_insec_overall_labels = ['Before COVID-19', 'Since COVID-19', 'Percent Change']
-    food_insec_overall_df = site_df.loc[site_df['vars'].isin(food_insec_overall_vars)]
-    food_insec_overall_df = food_insec_overall_df.replace(to_replace=food_insec_overall_vars, value=food_insec_overall_labels)
-    food_insec_overall_fig = px.bar(
-        food_insec_overall_df,
-        x='data',
-        y='vars',
-        text=food_insec_overall_df['data'].apply(lambda x: '{0:1.1f}%'.format(x*100)),
-        color='vars',
-        labels={
-            'data': 'Food-Insecure Respondents',
-            'vars': '',
-        },
-        orientation='h',
-        title='Food insecurity among all respondents',
-        template='plotly_white'
-    )
-
     food_insec_bipoc_vars = ['bipoc_before', 'bipoc_after', 'bipoc_diff']
-    food_insec_bipoc_labels = ['Before COVID-19', 'Since COVID-19', 'Percent Change']
-    food_insec_bipoc_df = site_df.loc[site_df['vars'].isin(food_insec_bipoc_vars)]
-    food_insec_bipoc_df = food_insec_bipoc_df.replace(to_replace=food_insec_bipoc_vars, value=food_insec_bipoc_labels)
-    food_insec_bipoc_fig = px.bar(
-        food_insec_bipoc_df,
-        x='data',
-        y='vars',
-        text=food_insec_bipoc_df['data'].apply(lambda x: '{0:1.1f}%'.format(x*100)),
-        color='vars',
-        labels={
-            'data': 'Food-Insecure Respondents',
-            'vars': '',
-        },
-        orientation='h',
-        title='Food insecurity among BIPOC respondents',
-        template='plotly_white'
-    )
-
     food_insec_nhw_vars = ['nhw_before', 'nhw_after', 'nhw_diff']
-    food_insec_nhw_labels = ['Before COVID-19', 'Since COVID-19', 'Percent Change']
-    food_insec_nhw_df = site_df.loc[site_df['vars'].isin(food_insec_nhw_vars)]
-    food_insec_nhw_df = food_insec_nhw_df.replace(to_replace=food_insec_nhw_vars, value=food_insec_nhw_labels)
-    food_insec_nhw_fig = px.bar(
-        food_insec_nhw_df,
-        x='data',
-        y='vars',
-        text=food_insec_nhw_df['data'].apply(lambda x: '{0:1.1f}%'.format(x*100)),
-        color='vars',
-        labels={
-            'data': 'Food-Insecure Respondents',
-            'vars': '',
-        },
-        orientation='h',
-        title='Food insecurity among non-Hispanic White respondents',
-        template='plotly_white'
-    )
-
     food_insec_nhb_vars = ['nhb_before', 'nhb_after', 'nhb_diff']
-    food_insec_nhb_labels = ['Before COVID-19', 'Since COVID-19', 'Percent Change']
-    food_insec_nhb_df = site_df.loc[site_df['vars'].isin(food_insec_nhb_vars)]
-    food_insec_nhb_df = food_insec_nhb_df.replace(to_replace=food_insec_nhb_vars, value=food_insec_nhb_labels)
-    food_insec_nhb_fig = px.bar(
-        food_insec_nhb_df,
-        x='data',
-        y='vars',
-        text=food_insec_nhb_df['data'].apply(lambda x: '{0:1.1f}%'.format(x*100)),
-        color='vars',
-        labels={
-            'data': 'Food-Insecure Respondents',
-            'vars': '',
-        },
-        orientation='h',
-        title='Food insecurity among non-Hispanic Black respondents',
-        template='plotly_white'
-    )
-
     food_insec_h_vars = ['h_before', 'h_after', 'h_diff']
-    food_insec_h_labels = ['Before COVID-19', 'Since COVID-19', 'Percent Change']
-    food_insec_h_df = site_df.loc[site_df['vars'].isin(food_insec_h_vars)]
-    food_insec_h_df = food_insec_h_df.replace(to_replace=food_insec_h_vars, value=food_insec_h_labels)
-    food_insec_h_fig = px.bar(
-        food_insec_h_df,
-        x='data',
-        y='vars',
-        text=food_insec_h_df['data'].apply(lambda x: '{0:1.1f}%'.format(x*100)),
-        color='vars',
-        labels={
-            'data': 'Food-Insecure Respondents',
-            'vars': '',
-        },
-        orientation='h',
-        title='Food insecurity among Hispanic respondents',
-        template='plotly_white'
+    food_insec_hhc_vars = ['hhc_before', 'hhc_after', 'hhc_diff']
+
+    food_insec_vars = (
+        food_insec_overall_vars +
+        food_insec_bipoc_vars +
+        food_insec_nhw_vars +
+        food_insec_nhb_vars +
+        food_insec_h_vars +
+        food_insec_hhc_vars
     )
 
-    food_insec_hhc_vars = ['hhc_before', 'hhc_after', 'hhc_diff']
-    food_insec_hhc_labels = ['Before COVID-19', 'Since COVID-19', 'Percent Change']
-    food_insec_hhc_df = site_df.loc[site_df['vars'].isin(food_insec_hhc_vars)]
-    food_insec_hhc_df = food_insec_hhc_df.replace(to_replace=food_insec_hhc_vars, value=food_insec_hhc_labels)
-    food_insec_hhc_fig = px.bar(
-        food_insec_hhc_df,
+    food_insec_df = site_df.loc[site_df['vars'].isin(food_insec_vars)]
+    food_insec_df['group'] = [var.split('_')[0] for var in food_insec_vars]
+    food_insec_df['timeline'] = [var.split('_')[1] for var in food_insec_vars]
+    group_vars = ['overall', 'bipoc', 'nhw', 'nhb', 'h', 'hhc']
+    group_labels = ['All Respondents', 'BIPOC', 'Non-Hispanic White', 'Non-Hispanic Black', 'Hispanic', 'Housholds w/Children']
+    timeline_vars = ['before', 'after', 'diff']
+    timeline_labels = ['Before COVID-19', 'Since COVID-19', 'Difference']
+    food_insec_df = food_insec_df.replace(to_replace=group_vars + timeline_vars, value=group_labels + timeline_labels)
+    food_insec_fig = px.bar(
+        food_insec_df,
         x='data',
-        y='vars',
-        text=food_insec_hhc_df['data'].apply(lambda x: '{0:1.1f}%'.format(x*100)),
-        color='vars',
+        y='group',
+        text=food_insec_df['data'].apply(lambda x: '{0:1.1f}%'.format(x*100)),
+        color='timeline',
         labels={
             'data': 'Food-Insecure Respondents',
-            'vars': '',
+            'group': 'Sub-Population Group',
+            'timeline': 'Timeline'
         },
         orientation='h',
-        title='Food insecurity among households with children',
-        template='plotly_white'
+        barmode='group',
+        title='Food insecurity among all respondent groups',
+        template='plotly_white',
+        color_discrete_sequence=['#00CC96', '#636EFA', '#EF553B'],
+        height=1000
     )
 
     job_disruption_vars = ['job_disruption', 'job_loss', 'furlough', 'reduced_hours']
@@ -501,42 +412,25 @@ def display_site_graphs(study_site_name):
         },
         orientation='h',
         title='Food insecurity since COVID-19 among respondents with any type of work disruption',
-        template='plotly_white'
+        template='plotly_white',
+        color_discrete_sequence=px.colors.qualitative.Plotly,
     )
 
     food_insec_figures = [
-        food_insec_overall_fig,
-        food_insec_bipoc_fig,
-        food_insec_nhw_fig,
-        food_insec_nhb_fig,
-        food_insec_h_fig,
-        food_insec_hhc_fig,
-        job_disruption_fig
+        food_insec_fig
     ]
 
-    food_insec_vars = (
-        food_insec_overall_vars +
-        food_insec_bipoc_vars +
-        food_insec_nhw_vars +
-        food_insec_nhb_vars +
-        food_insec_h_vars +
-        food_insec_hhc_vars +
-        job_disruption_vars
-    )
-
     pop_chart_fig.update_layout(showlegend=False)
-    for fig in food_insec_figures:
-        fig.update_layout(showlegend=False, xaxis_tickformat = '0%')
-        fig.update_xaxes(range=[-0.1, 1.0])
+
+    job_disruption_fig.update_layout(showlegend=False, xaxis_tickformat = '0%')
+    job_disruption_fig.update_xaxes(range=[-0.1, 1.0])
+
+    food_insec_fig.update_layout(xaxis_tickformat = '0%', )
+    food_insec_fig.update_xaxes(range=[-0.1, 1.0])
 
     return(
         pop_chart_fig,
-        food_insec_overall_fig,
-        food_insec_bipoc_fig,
-        food_insec_nhw_fig,
-        food_insec_nhb_fig,
-        food_insec_h_fig,
-        food_insec_hhc_fig,
+        food_insec_fig,
         job_disruption_fig
     )
 
