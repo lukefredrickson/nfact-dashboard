@@ -1,4 +1,5 @@
 import plotly.express as px
+import plotly.io as pio
 import dash
 from dash import dcc
 from dash import html
@@ -142,14 +143,19 @@ styles = {
 }
 
 study_site_table = dbc.Table(
-    html.Tbody([
-        html.Tr([html.Td('Target Population'), html.Td('', id='target-population')]),
-        html.Tr([html.Td('Representative of State Population'), html.Td('', id='rep-state')]),
-        html.Tr([html.Td('Survey Sample Type'), html.Td('', id='sample-type')]),
-        html.Tr([html.Td('Survey Weighting'), html.Td('', id='weighting')]),
-        html.Tr([html.Td('Sampling and Recruitment'), html.Td('', id='sample-recruitment')]),
-    ]),
-    bordered=False,
+    children=[
+        html.Thead([
+            html.Th('Study Site Information', colSpan=2)
+        ]),
+        html.Tbody([
+            html.Tr([html.Td('Target Population'), html.Td('', id='target-population')]),
+            html.Tr([html.Td('Representative of State Population'), html.Td('', id='rep-state')]),
+            html.Tr([html.Td('Survey Sample Type'), html.Td('', id='sample-type')]),
+            html.Tr([html.Td('Survey Weighting'), html.Td('', id='weighting')]),
+            html.Tr([html.Td('Sampling and Recruitment'), html.Td('', id='sample-recruitment')]),
+        ])
+    ],
+    bordered=True,
     size='lg'
 )
 
@@ -220,9 +226,6 @@ study_site_info = html.Div(
             dbc.Col(
                 children=[
                     html.Br(),
-                    html.H4(
-                        'Study Site Information'
-                    )
                 ]
             )
         ),
@@ -231,13 +234,18 @@ study_site_info = html.Div(
                 dbc.Col(
                     children=[
                         study_site_table,
-                        html.Div(
-                            id='df-table'
-                        )
+                        dcc.Graph(id='population-fig', figure=px.bar()),
+                        dcc.Graph(id='job-disruption-fig', figure=px.bar()),
+                        dcc.Graph(id='food-insecurity-bipoc-fig', figure=px.bar()),
                     ]
                 ),
                 dbc.Col(
-                    dcc.Graph(id='pop-fig', figure=px.bar())
+                    children = [
+                        dcc.Graph(id='food-insecurity-overall-fig', figure=px.bar()),
+                        dcc.Graph(id='food-insecurity-h-fig', figure=px.bar()),
+                        dcc.Graph(id='food-insecurity-nhw-fig', figure=px.bar()),
+                        dcc.Graph(id='food-insecurity-nhb-fig', figure=px.bar()),
+                    ]
                 ),
             ]
         )
@@ -331,8 +339,13 @@ def display_site_info(study_site_name):
         return ('', '', '', '', '')
 
 @app.callback(
-    Output('df-table', 'children'),
-    Output('pop-fig', 'figure'),
+    Output('population-fig', 'figure'),
+    Output('food-insecurity-overall-fig', 'figure'),
+    Output('food-insecurity-bipoc-fig', 'figure'),
+    Output('food-insecurity-nhw-fig', 'figure'),
+    Output('food-insecurity-nhb-fig', 'figure'),
+    Output('food-insecurity-h-fig', 'figure'),
+    Output('job-disruption-fig', 'figure'),
     Input('study-site-dropdown', 'value'),
 )
 def display_site_graphs(study_site_name):
@@ -341,11 +354,6 @@ def display_site_graphs(study_site_name):
     site_df.index.name = 'vars'
     site_df.reset_index(inplace=True)
     site_df.columns.values[1] = 'data'
-    table = dbc.Table.from_dataframe(
-        df = site_df,
-        striped=True,
-        bordered=True,
-        hover=True),
 
     pop_chart_vars = ['total', 'hh_children', 'work_disruption', 'bipoc', 'nhw', 'nhb', 'hispanic', 'other']
     pop_chart_df = site_df.loc[site_df['vars'].isin(pop_chart_vars)]
@@ -353,10 +361,79 @@ def display_site_graphs(study_site_name):
         pop_chart_df,
         x='vars',
         y='data',
-        title='Total number of respondents and sub-population characteristics'
+        title='Total number of respondents and sub-population characteristics',
+        template='plotly_white'
     )
 
-    return(table, pop_chart_fig)
+    food_insec_overall_vars = ['overall_before', 'overall_after', 'overall_diff']
+    food_insec_overall_df = site_df.loc[site_df['vars'].isin(food_insec_overall_vars)]
+    food_insec_overall_fig = px.bar(
+        food_insec_overall_df,
+        x='vars',
+        y='data',
+        title='Total number of respondents and sub-population characteristics',
+        template='plotly_white'
+    )
+
+    food_insec_bipoc_vars = ['bipoc_before', 'bipoc_after', 'bipoc_diff']
+    food_insec_bipoc_df = site_df.loc[site_df['vars'].isin(food_insec_bipoc_vars)]
+    food_insec_bipoc_fig = px.bar(
+        food_insec_bipoc_df,
+        x='vars',
+        y='data',
+        title='Total number of respondents and sub-population characteristics',
+        template='plotly_white'
+    )
+
+    food_insec_nhw_vars = ['nhw_before', 'nhw_after', 'nhw_diff']
+    food_insec_nhw_df = site_df.loc[site_df['vars'].isin(food_insec_nhw_vars)]
+    food_insec_nhw_fig = px.bar(
+        food_insec_nhw_df,
+        x='vars',
+        y='data',
+        title='Total number of respondents and sub-population characteristics',
+        template='plotly_white'
+    )
+
+    food_insec_nhb_vars = ['nhb_before', 'nhb_after', 'nhb_diff']
+    food_insec_nhb_df = site_df.loc[site_df['vars'].isin(food_insec_nhb_vars)]
+    food_insec_nhb_fig = px.bar(
+        food_insec_nhb_df,
+        x='vars',
+        y='data',
+        title='Total number of respondents and sub-population characteristics',
+        template='plotly_white'
+    )
+
+    food_insec_h_vars = ['h_before', 'h_after', 'h_diff']
+    food_insec_h_df = site_df.loc[site_df['vars'].isin(food_insec_h_vars)]
+    food_insec_h_fig = px.bar(
+        food_insec_h_df,
+        x='vars',
+        y='data',
+        title='Total number of respondents and sub-population characteristics',
+        template='plotly_white'
+    )
+
+    job_disruption_vars = ['job_disruption', 'job_loss', 'furlough', 'reduced_hours']
+    job_disruption_df = site_df.loc[site_df['vars'].isin(job_disruption_vars)]
+    job_disruption_fig = px.bar(
+        job_disruption_df,
+        x='vars',
+        y='data',
+        title='Total number of respondents and sub-population characteristics',
+        template='plotly_white'
+    )
+
+    return(
+        pop_chart_fig,
+        food_insec_overall_fig,
+        food_insec_bipoc_fig,
+        food_insec_nhw_fig,
+        food_insec_nhb_fig,
+        food_insec_h_fig,
+        job_disruption_fig
+    )
 
 
 if __name__ == '__main__':
