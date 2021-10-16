@@ -35,12 +35,22 @@ with open('data/db.csv') as df_file:
 
 # Figures & Components
 
-map_fig = px.choropleth_mapbox(df, geojson=states, locations='state', featureidkey='properties.NAME',
-                               mapbox_style='carto-positron',
-                               zoom=4, center={'lat': 38, 'lon': -95.7129},
-                               opacity=1,
-                               )
-map_fig.update_layout(margin={'r': 0, 't': 0, 'l': 0, 'b': 0}, showlegend=False)
+map_fig = px.choropleth_mapbox(
+    df,
+    geojson=states, 
+    locations=df['state'].unique(),
+    featureidkey='properties.NAME',
+    color = df.groupby(['state']).size(),
+    labels={
+        'locations': 'State',
+        'color': 'Number of Study Sites',
+    },
+    color_continuous_scale=px.colors.sequential.Sunsetdark,
+    mapbox_style='carto-positron',
+    zoom=4, center={'lat': 38, 'lon': -95.7129},
+    opacity=1,
+)
+map_fig.update_layout(margin={'r': 0, 't': 0, 'l': 0, 'b': 0}, coloraxis_showscale=False)
 
 start_date = df['start_date'].min()
 end_date = df['end_date'].max()
@@ -379,8 +389,8 @@ def display_site_graphs(study_site_name):
     food_insec_df = food_insec_df.replace(to_replace=group_vars + timeline_vars, value=group_labels + timeline_labels)
     food_insec_fig = px.bar(
         food_insec_df,
-        x='data',
-        y='group',
+        x='group',
+        y='data',
         text=food_insec_df['data'].apply(lambda x: '{0:1.1f}%'.format(x*100)),
         color='timeline',
         labels={
@@ -388,7 +398,6 @@ def display_site_graphs(study_site_name):
             'group': 'Sub-Population Group',
             'timeline': 'Timeline'
         },
-        orientation='h',
         barmode='group',
         title='Food insecurity among all respondent groups',
         template='plotly_white',
@@ -402,31 +411,22 @@ def display_site_graphs(study_site_name):
     job_disruption_df = job_disruption_df.replace(to_replace=job_disruption_vars, value=job_disruption_labels)
     job_disruption_fig = px.bar(
         job_disruption_df,
-        x='data',
-        y='vars',
+        x='vars',
+        y='data',
         text=job_disruption_df['data'].apply(lambda x: '{0:1.1f}%'.format(x*100)),
         color='vars',
         labels={
             'data': 'Food-Insecure Respondents',
             'vars': 'Type of Work Disruption',
         },
-        orientation='h',
         title='Food insecurity since COVID-19 among respondents with any type of work disruption',
         template='plotly_white',
         color_discrete_sequence=px.colors.qualitative.Plotly,
     )
 
-    food_insec_figures = [
-        food_insec_fig
-    ]
-
     pop_chart_fig.update_layout(showlegend=False)
-
-    job_disruption_fig.update_layout(showlegend=False, xaxis_tickformat = '0%')
-    job_disruption_fig.update_xaxes(range=[-0.1, 1.0])
-
-    food_insec_fig.update_layout(xaxis_tickformat = '0%', )
-    food_insec_fig.update_xaxes(range=[-0.1, 1.0])
+    job_disruption_fig.update_layout(showlegend=False, yaxis_tickformat = '0%')
+    food_insec_fig.update_layout(yaxis_tickformat = '0%', )
 
     return(
         pop_chart_fig,
