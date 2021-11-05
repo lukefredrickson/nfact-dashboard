@@ -25,6 +25,12 @@ app = dash.Dash(
 app.title = 'US Food Insecurity'
 server = app.server
 
+# manually defined color sequences for bar and map charts
+# nfact color sequence
+BAR_COLOR_SEQUENCE = ["#BDB964", "#7C1C23", "#3D1322", "#317380", "#8FC4C6", "#E2D8CE"]
+# let's use a single color for the map for now (may recolor using food security later)
+MAP_COLOR_SEQUENCE = ["#7C1C23","#7C1C23"] 
+
 # Load Data
 
 with open('data/gz_2010_us_040_00_500k.json') as geojson:
@@ -45,10 +51,10 @@ map_fig = px.choropleth_mapbox(
         'locations': 'State',
         'color': 'Number of Study Sites',
     },
-    color_continuous_scale=px.colors.sequential.Sunsetdark,
+    color_continuous_scale = MAP_COLOR_SEQUENCE,  #"amp", #"reds", #px.colors.sequential.Sunsetdark
     mapbox_style='carto-positron',
     zoom=4, center={'lat': 38, 'lon': -95.7129},
-    opacity=1,
+    opacity= .7,
 )
 map_fig.update_layout(margin={'r': 0, 't': 0, 'l': 0, 'b': 0}, coloraxis_showscale=False)
 
@@ -66,7 +72,7 @@ date_slider = dcc.RangeSlider(
     max=n_months,
     step=None,
     marks=dates,
-    value=[]
+    value=[],
 )
 
 
@@ -90,11 +96,20 @@ study_site_dropdown = dcc.Dropdown(
 
 header = dbc.Row(
     id='header',
-    justify='between',
+    justify= 'center', #'between',
     align='start',
     children=[
-        dbc.Col(
-            width=8,
+        dbc.Row(
+            children=[
+                html.A(
+                    html.Img(id='logo', src=app.get_asset_url('NFACT_logo.png'), width="100%"),
+                    href='https://www.nfactresearch.org/',
+                    target = "_blank"
+                ),
+            ],    
+        ),
+        dbc.Row(
+            style = {"margin-top":"50px"},
             children=[
                 html.H1(children='United States Food Insecurity'),
                 html.P(
@@ -106,15 +121,6 @@ header = dbc.Row(
                 ),
             ]
         ),
-        dbc.Col(
-            width='auto',
-            children=[
-                html.A(
-                    html.Img(id='logo', src=app.get_asset_url('segs_logo.png')),
-                    href='https://segs.w3.uvm.edu/',
-                ),
-            ]
-        )
     ],
 )
 
@@ -127,7 +133,8 @@ main_map = html.Div(
                 children=[
                     dcc.Graph(
                         id='map-figure',
-                        figure=map_fig
+                        figure=map_fig,
+                        config = {"scrollZoom":False} # disable mouse scrolling on map
                     ),
                 ]
             )
@@ -359,7 +366,7 @@ def display_site_graphs(study_site_name):
         },
         title='Total number of respondents and sub-population characteristics',
         template='plotly_white',
-        color_discrete_sequence=px.colors.qualitative.Plotly,
+        color_discrete_sequence= BAR_COLOR_SEQUENCE #px.colors.qualitative.Plotly,
     )
 
     
@@ -401,7 +408,7 @@ def display_site_graphs(study_site_name):
         barmode='group',
         title='Food insecurity among all respondent groups',
         template='plotly_white',
-        color_discrete_sequence=['#00CC96', '#636EFA', '#EF553B'],
+        color_discrete_sequence= BAR_COLOR_SEQUENCE, #['#00CC96', '#636EFA', '#EF553B'],
         height=1000
     )
 
@@ -421,7 +428,7 @@ def display_site_graphs(study_site_name):
         },
         title='Food insecurity since COVID-19 among respondents with any type of work disruption',
         template='plotly_white',
-        color_discrete_sequence=px.colors.qualitative.Plotly,
+        color_discrete_sequence= BAR_COLOR_SEQUENCE, #px.colors.qualitative.Plotly,
     )
 
     pop_chart_fig.update_layout(showlegend=False)
