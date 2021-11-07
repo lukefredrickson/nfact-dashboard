@@ -116,9 +116,16 @@ header = dbc.Row(
                     id='description',
                     className='text-muted',
                     children=[
-                        'Support for this project was provided in part by Cooperative Agreement Number (U48DP006374) funded by the Centers for Disease Control and Prevention’s Division of Nutrition, Physical Activity, and Obesity (DNPAO) and Prevention Research Centers Program, which includes the Nutrition and Obesity Policy Research and Evaluation Network (NOPREN). The findings and conclusions in this product are those of the author(s) and do not necessarily represent the official position of the CDC or DHHS.'
+                        "The National Food Access and COVID research Team (NFACT) is a collaboration of researchers across 15 states exploring the impact of COVID-19 on food access, food security and food systems. NFACT research is examining these impacts across local, state, regional and national levels and is integrating data to explore outcomes and impacts across scales. NFACT is committed to rigorous, comparative, and timely food access research during the time of COVID. We do this through collaborative, open access platforms and research that prioritizes communication to key decision-makers while building our scientific understanding of food system behaviors and policies. "
+                        'Support for this project was provided in part by Cooperative Agreement Number (U48DP006374) funded by the Centers for Disease Control and Prevention’s Division of Nutrition, Physical Activity, and Obesity (DNPAO) and Prevention Research Centers Program, which includes the Nutrition and Obesity Policy Research and Evaluation Network (NOPREN). The findings and conclusions in this product are those of the author(s) and do not necessarily represent the official position of the CDC or DHHS. '
                     ]
                 ),
+                dcc.Link(
+                    children = "Published Results",
+                    href = "https://academic.oup.com/cdn/advance-article/doi/10.1093/cdn/nzab135/6415196",
+                    target = "_blank",
+                    style = {"color": "#7C1C23", 'margin-left':"50px"}
+                    ),    
             ]
         ),
     ],
@@ -126,6 +133,7 @@ header = dbc.Row(
 
 main_map = html.Div(
     id='map-container',
+    style = {"margin-top":"20px"},
     children=[
         dbc.Row(
             dbc.Col(
